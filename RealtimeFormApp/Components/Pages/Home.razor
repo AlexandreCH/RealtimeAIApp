@@ -25,6 +25,23 @@
     </button>
 </SectionContent>
 
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <div class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>@errorMessage</span>
+            <button @onclick="@(() => errorMessage = null)" class="ml-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    </div>
+}
+
 <EditForm EditContext="@editContext" class="grid grid-cols-12 gap-x-10 gap-y-8">
     <ObjectGraphDataAnnotationsValidator />
 
@@ -128,6 +145,7 @@
     List<string> messages = new();
     SemaphoreSlim writeAudioSemaphore = new(1);
     MicControl.MicStatus micStatus = MicControl.MicStatus.Disconnected;
+    string? errorMessage;
 
     protected override void OnInitialized()
     {
@@ -152,6 +170,15 @@
                 await DispatchExceptionAsync(ex);
             }
         }
+    }
+
+    [JSInvokable]
+    public Task OnMicrophoneError(string message)
+    {
+        errorMessage = message;
+        micStatus = MicControl.MicStatus.Disconnected;
+        StateHasChanged();
+        return Task.CompletedTask;
     }
 
     private void UpdateModel(CarDescriptor newCar)
@@ -240,12 +267,21 @@
 
     private async Task ChangeMicStatusAsync()
     {
+        // Clear any previous error message
+        errorMessage = null;
+        
         var module = await moduleTask!;
         switch (micStatus)
         {
             case MicControl.MicStatus.Disconnected:
                 micStatus = MicControl.MicStatus.Active;
                 mic = await module.InvokeAsync<IJSObjectReference>("start", selfReference);
+                
+                // If mic is null, it means there was an error (handled by OnMicrophoneError)
+                if (mic == null)
+                {
+                    micStatus = MicControl.MicStatus.Disconnected;
+                }
                 break;
             case MicControl.MicStatus.Active:
                 micStatus = MicControl.MicStatus.Muted;
