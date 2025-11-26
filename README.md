@@ -73,3 +73,15 @@ There's an object model defined in `CarDescriptor.cs`. This is formatted as a JS
 The AI is told there's a JSON document that it should update based on whatever the user asks. This JSON document is two-way bound to the UI, so any changes made by the AI are shown in the UI, and any changes made by the user are visible to the AI.
 
 Note that `RealtimeConversationManager` is generically typed so the same logic there should work for editing other data schemas.
+
+
+## 2025-11-26
+
+As "gpt-4o-realtime-preview" is deprecated in mid-2025 it does not work any more.
+Replaced by "gpt-4o-mini-realtime-preview" that was deployed in 
+MS Foundry / azs-az-open-ai-project / Models + endpoints
+Get endpoint - dialog to get both keys to add to the "secrets.json"
+
+
+
+
