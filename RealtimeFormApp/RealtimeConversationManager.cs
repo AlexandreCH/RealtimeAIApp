@@ -25,12 +25,19 @@ public class RealtimeConversationManager<TModel>(string modelDescription, Realti
                 You are helping to edit a JSON object that represents a {modelDescription}.
                 This JSON object conforms to the following schema: {jsonSchema}
 
-                Listen to the user and collect information from them. Do not reply to them unless they explicitly
-                ask for your input; just listen.
-                Each time they provide information that can be added to the JSON object, add it to the existing object,
-                and then call the tool to save the updated object. Don't stop updating the JSON object.
-                Even if you think the information is incorrect, accept it - do not try to correct mistakes.
-                After each time you have called the JSON updating tool, just reply OK.
+                IMPORTANT RULES:
+                1. Listen to the user and collect information from them. Do not reply unless explicitly asked.
+                2. When updating the JSON object, ALWAYS include ALL existing fields with their current values.
+                3. Only change the specific fields mentioned by the user.
+                4. NEVER send null or empty values for fields that already have data.
+                5. For nested objects, include ALL properties even if only one changed.
+                6. For lists, always include all existing items plus any new ones.
+                7. After calling the save tool, just reply "OK".
+
+                Example: If user says "set wallet to 200" and current FirstName is "John", 
+                include both in the update: FirstName must still be "John", Wallet becomes 200.
+
+                DO NOT send partial updates that omit existing data.
                 """,
             Voice = ConversationVoice.Alloy,
             ContentModalities = ConversationContentModalities.Text,
@@ -97,7 +104,12 @@ public class RealtimeConversationManager<TModel>(string modelDescription, Realti
             if (newJson != prevModelJson)
             {
                 prevModelJson = newJson;
-                await session.AddItemAsync(ConversationItem.CreateUserMessage([$"The current modelData value is {newJson}. When updating this later, include all these same values if they are unchanged (or they will be overwritten with nulls)."]));
+                await session.AddItemAsync(ConversationItem.CreateUserMessage([
+                    $"CURRENT STATE: {newJson}",
+                    "IMPORTANT: When saving updates, you MUST include ALL of these existing values.",
+                    "Only change the fields the user specifically mentions.",
+                    "Never omit or set to null any fields that have values."
+                ]));
             }
         }
     }

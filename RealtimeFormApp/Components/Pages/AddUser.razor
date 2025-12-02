@@ -297,15 +297,34 @@
             var oldValue = prop.GetValue(oldModel);
             var newValue = prop.GetValue(newModel);
             
-            // Handle complex types with validation attribute
+            // Handle complex types with validation attribute (like InterestStatus)
             if (prop.PropertyType.GetCustomAttributes<ValidateComplexTypeAttribute>().Any())
             {
                 if (oldValue is not null && newValue is not null)
                 {
+                    // Recursively update nested properties
                     foundChange |= UpdateModelProperties(oldValue, newValue);
                 }
             }
-            // Only update if new value is not null (to prevent overwriting with nulls)
+            // Handle List<string> - only update if new list has items
+            else if (prop.PropertyType == typeof(List<string>))
+            {
+                var oldList = oldValue as List<string>;
+                var newList = newValue as List<string>;
+                
+                // Only update if new list has items (don't overwrite with empty list)
+                if (newList is not null && newList.Count > 0)
+                {
+                    // Check if lists are different
+                    if (oldList is null || !oldList.SequenceEqual(newList))
+                    {
+                        prop.SetValue(oldModel, newList);
+                        editContext!.NotifyFieldChanged(new FieldIdentifier(oldModel, prop.Name));
+                        foundChange = true;
+                    }
+                }
+            }
+            // Handle regular properties - only update if new value is not null
             else if (newValue is not null && !Equals(oldValue, newValue))
             {
                 prop.SetValue(oldModel, newValue);
