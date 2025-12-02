@@ -49,32 +49,32 @@
 
     <div class="bg-gray-200 px-6 py-5 rounded-lg grid grid-cols-2 gap-x-8 gap-y-5 md:grid-cols-4 col-span-12">
         <div>
-            <label class="text-sm block font-medium text-gray-700">Make</label>
-            <InputText @bind-Value="@car.Make" class="w-full mt-2 px-3 py-1 rounded-md shadow-md outline-2 focus:outline focus:outline-blue-500" />
+            <label class="text-sm block font-medium text-gray-700">First name</label>
+            <InputText @bind-Value="@user.FirstName" class="w-full mt-2 px-3 py-1 rounded-md shadow-md outline-2 focus:outline focus:outline-blue-500" />
         </div>
         <div>
-            <label class="text-sm block font-medium text-gray-700">Model</label>
-            <InputText @bind-Value="@car.Model" class="w-full mt-2 px-3 py-1 rounded-md shadow-md outline-2 focus:outline focus:outline-blue-500" />
+            <label class="text-sm block font-medium text-gray-700">Last name</label>
+            <InputText @bind-Value="@user.LastName" class="w-full mt-2 px-3 py-1 rounded-md shadow-md outline-2 focus:outline focus:outline-blue-500" />
         </div>
         <div>
-            <label class="text-sm block font-medium text-gray-700">Year</label>
-            <InputNumber @bind-Value="@car.Year" class="w-full mt-2 px-3 py-1 rounded-md shadow-md outline-2 focus:outline focus:outline-blue-500" />
+            <label class="text-sm block font-medium text-gray-700">Wallet</label>
+            <InputNumber @bind-Value="@user.Wallet" class="w-full mt-2 px-3 py-1 rounded-md shadow-md outline-2 focus:outline focus:outline-blue-500" />
         </div>
         <div>
-            <label class="text-sm block font-medium text-gray-700">Mileage</label>
-            <InputNumber @bind-Value="@car.Mileage" class="w-full mt-2 px-3 py-1 rounded-md shadow-md outline-2 focus:outline focus:outline-blue-500" />
+            <label class="text-sm block font-medium text-gray-700">E-mail</label>
+            <InputText @bind-Value="@user.Email" class="w-full mt-2 px-3 py-1 rounded-md shadow-md outline-2 focus:outline focus:outline-blue-500" />
         </div>
     </div>
 
     <div class="bg-gray-200 px-6 py-6 rounded-lg col-span-12 lg:col-span-7">
         <label class="text-base block font-medium text-gray-700">Condition / features</label>
 
-        @for (var i = 0; i < (car.ConditionNotes ?? []).Count; i++)
+        @for (var i = 0; i < (user.Interests ?? []).Count; i++)
         {
             var j = i;
             <div class="flex gap-4 mt-4 mb-2 items-start">
-                <ContentEditable @bind-Value="@car.ConditionNotes![j]" class="w-full leading-tight px-5 py-4 bg-white rounded-md shadow-md focus:outline focus:outline-2 focus:outline-blue-500" />
-                <button @onclick="@(() => car.ConditionNotes.RemoveAt(j))" type="button" class="w-4 ml-1 text-gray-700 mt-4">
+                <ContentEditable @bind-Value="@user.Interests![j]" class="w-full leading-tight px-5 py-4 bg-white rounded-md shadow-md focus:outline focus:outline-2 focus:outline-blue-500" />
+                <button @onclick="@(() => user.Interests.RemoveAt(j))" type="button" class="w-4 ml-1 text-gray-700 mt-4">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                     </svg>
@@ -82,7 +82,7 @@
             </div>
         }
 
-        <button @onclick="@(() => car.ConditionNotes!.Add(""))" type="button" class="flex gap-1 items-center mt-5 py-2 px-4 text-sm bg-blue-900 rounded-md text-white font-semibold hover:bg-blue-600 active:bg-blue-900 active:translate-y-px transition-all">
+        <button @onclick="@(() => user.Interests!.Add(""))" type="button" class="flex gap-1 items-center mt-5 py-2 px-4 text-sm bg-blue-900 rounded-md text-white font-semibold hover:bg-blue-600 active:bg-blue-900 active:translate-y-px transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -92,23 +92,23 @@
     </div>
 
     <div class="bg-gray-200 px-6 py-4 rounded-lg col-span-12 lg:col-span-5">
-        <label class="text-base block font-medium text-gray-700">Tyres</label>
+        <label class="text-base block font-medium text-gray-700">Categories</label>
         <div class="grid grid-cols-2 my-4 gap-6">
             <div>
-                <label class="text-sm block font-medium text-gray-700">Front left</label>
-                <TyreStatusPicker @bind-Value="@car.Tyres.FrontLeft" />
+                <label class="text-sm block font-medium text-gray-700">First Rate</label>
+                <InterestCategoryPicker @bind-Value="@user.InterestStatus.FirstRateCategory" />
             </div>
             <div>
-                <label class="text-sm block font-medium text-gray-700">Front right</label>
-                <TyreStatusPicker @bind-Value="@car.Tyres.FrontRight" />
+                <label class="text-sm block font-medium text-gray-700">Second Rate</label>
+                <InterestCategoryPicker @bind-Value="@user.InterestStatus.SecondRateCategory" />
             </div>
             <div>
-                <label class="text-sm block font-medium text-gray-700">Back left</label>
-                <TyreStatusPicker @bind-Value="@car.Tyres.BackLeft" />
+                <label class="text-sm block font-medium text-gray-700">Third Rate</label>
+                <InterestCategoryPicker @bind-Value="@user.InterestStatus.ThirdRateCategory" />
             </div>
             <div>
-                <label class="text-sm block font-medium text-gray-700">Back right</label>
-                <TyreStatusPicker @bind-Value="@car.Tyres.BackRight" />
+                <label class="text-sm block font-medium text-gray-700">Fourth Rate</label>
+                <InterestCategoryPicker @bind-Value="@user.InterestStatus.FourthRateCategory" />
             </div>
         </div>
     </div>
@@ -135,14 +135,14 @@
 }
 
 @code {
-    readonly CarDescriptor car = new();
+    readonly UserDescriptor user = new();
     EditContext? editContext;
     Task<IJSObjectReference>? moduleTask;
     IJSObjectReference? mic;
     DotNetObjectReference<AddUser>? selfReference;
     Pipe micPipe = new();
     Speaker? speaker;
-    RealtimeConversationManager<CarDescriptor>? realtimeConversationManager;
+    RealtimeConversationManager<UserDescriptor>? realtimeConversationManager;
     CancellationTokenSource disposalCts = new();
     List<string> messages = new();
     SemaphoreSlim writeAudioSemaphore = new(1);
@@ -151,7 +151,7 @@
 
     protected override void OnInitialized()
     {
-        editContext = new EditContext(car);
+        editContext = new EditContext(user);
         selfReference = DotNetObjectReference.Create(this);
         moduleTask = JS.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/AddUser.razor.js").AsTask();
     }
@@ -163,13 +163,15 @@
         {
             try
             {
-                realtimeConversationManager = new("Car to be listed for sale",
+                realtimeConversationManager = new("User profile",
                     RealtimeClient, micPipe.Reader.AsStream(), speaker!, UpdateModel, AddMessage);
                 await realtimeConversationManager.RunAsync(disposalCts.Token);
             }
             catch (Exception ex)
             {
-                await DispatchExceptionAsync(ex);
+                errorMessage = $"Error connecting to AI: {ex.Message}";
+                micStatus = MicControl.MicStatus.Disconnected;
+                StateHasChanged();
             }
         }
     }
@@ -183,13 +185,13 @@
         return Task.CompletedTask;
     }
 
-    private void UpdateModel(CarDescriptor newCar)
+    private void UpdateModel(UserDescriptor newUser)
     {
         // This method is called by the conversation manager from outside the Blazor event mechanism,
         // so we need to InvokeAsync onto the sync context, and manually call StateHasChanged
         InvokeAsync(() =>
         {
-            if (UpdateModelProperties(car, newCar))
+            if (UpdateModelProperties(user, newUser))
             {
                 StateHasChanged();
             }
@@ -226,13 +228,17 @@
 
     public async ValueTask DisposeAsync()
     {
+        await disposalCts.CancelAsync();
         disposalCts.Dispose();
-        selfReference?.Dispose();
         realtimeConversationManager?.Dispose();
+        selfReference?.Dispose();
         try
         {
-            var module = await moduleTask!;
-            await module.DisposeAsync();
+            if (moduleTask is not null)
+            {
+                var module = await moduleTask;
+                await module.DisposeAsync();
+            }
         }
         catch (JSDisconnectedException)
         {
@@ -242,7 +248,10 @@
 
     protected override void OnAfterRender(bool firstRender)
     {
-        realtimeConversationManager?.SetModelData(car);
+        if (realtimeConversationManager is not null)
+        {
+            _ = realtimeConversationManager.SetModelData(user);
+        }
     }
 
     private bool UpdateModelProperties(object oldModel, object newModel)
@@ -252,11 +261,17 @@
         {
             var oldValue = prop.GetValue(oldModel);
             var newValue = prop.GetValue(newModel);
+            
+            // Handle complex types with validation attribute
             if (prop.PropertyType.GetCustomAttributes<ValidateComplexTypeAttribute>().Any())
             {
-                foundChange |= UpdateModelProperties(oldValue!, newValue!);
+                if (oldValue is not null && newValue is not null)
+                {
+                    foundChange |= UpdateModelProperties(oldValue, newValue);
+                }
             }
-            else if (oldValue != newValue)
+            // Only update if new value is not null (to prevent overwriting with nulls)
+            else if (newValue is not null && !Equals(oldValue, newValue))
             {
                 prop.SetValue(oldModel, newValue);
                 editContext!.NotifyFieldChanged(new FieldIdentifier(oldModel, prop.Name));

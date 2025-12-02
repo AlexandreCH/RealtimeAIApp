@@ -1,0 +1,21 @@
+@using System.Linq.Expressions
+@using Microsoft.AspNetCore.Components.Forms
+<InputSelect class="w-full mt-2 px-3 py-1 rounded-md shadow-md focus:outline focus:outline-2 focus:outline-blue-500" Value="@Value" ValueChanged="@ValueChanged" ValueExpression="@ValueExpression">
+    <option value=""></option>
+    <option value="@(InterestCategories.Art)">Art</option>
+    <option value="@(InterestCategories.House)">House</option>
+    <option value="@(InterestCategories.Studio)">Studio</option>
+    <option value="@(InterestCategories.Sport)">Sport</option>
+    <option value="@(InterestCategories.Urban)">Urban</option>
+    <option value="@(InterestCategories.PlayGround)">PlayGround</option>
+</InputSelect>
+@code {
+    [Parameter]
+    public InterestCategories? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<InterestCategories?> ValueChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<InterestCategories?>>? ValueExpression { get; set; }
+}
