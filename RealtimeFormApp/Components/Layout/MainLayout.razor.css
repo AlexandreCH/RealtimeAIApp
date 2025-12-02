@@ -16,10 +16,3 @@
         right: 0.75rem;
         top: 0.5rem;
     }
-
-/* NavLink active state styling */
-::deep a.active {
-    background-color: rgb(30 58 138) !important;
-    color: white !important;
-    font-weight: 600;
-}

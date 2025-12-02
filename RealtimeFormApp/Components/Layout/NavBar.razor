@@ -1,0 +1,26 @@
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+
+<nav class="flex items-center h-16 font-medium text-sm gap-4 text-gray-100">
+    <a class="py-2 px-3 rounded-md cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/")'>
+        Home
+    </a>
+    <a class="py-2 px-3 rounded-md cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/")'>
+        Vehicles
+    </a>
+    <a class="py-2 px-3 rounded-md cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/adduser")'>
+        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Add user
+    </a>
+    <a class="py-2 px-3 rounded-md cursor-pointer" @onclick='() => {}'>
+        Sales
+    </a>
+    <a class="py-2 px-3 rounded-md cursor-pointer" @onclick='() => {}'>
+        Reports
+    </a>
+    <a class="py-2 px-3 rounded-md cursor-pointer ml-auto invisible md:visible" @onclick='() => {}'>
+        Settings
+    </a>
+    <a class="py-2 px-3 rounded-md cursor-pointer invisible md:visible" @onclick='() => {}'>
+        Log out
+    </a>
+</nav>
