@@ -211,27 +211,58 @@
     }
 
     [JSInvokable]
-    public Task ReceiveAudioDataAsync(byte[] data) => InvokeAsync(async () =>
+    public Task ReceiveAudioDataAsync(byte[] data)
     {
-        if (writeAudioSemaphore.Wait(0))
+        // Check if component is being disposed
+        if (disposalCts.IsCancellationRequested)
         {
-            try
-            {
-                await micPipe.Writer.WriteAsync(data);
-            }
-            finally
-            {
-                writeAudioSemaphore.Release();
-            }
+            return Task.CompletedTask;
         }
-    });
+
+        return InvokeAsync(async () =>
+        {
+            if (writeAudioSemaphore.Wait(0))
+            {
+                try
+                {
+                    await micPipe.Writer.WriteAsync(data);
+                }
+                finally
+                {
+                    writeAudioSemaphore.Release();
+                }
+            }
+        });
+    }
 
     public async ValueTask DisposeAsync()
     {
+        // Stop microphone FIRST to prevent more audio callbacks
+        if (mic is not null && moduleTask is not null)
+        {
+            try
+            {
+                var module = await moduleTask;
+                await module.InvokeVoidAsync("stopMicrophone", mic);
+            }
+            catch (Exception ex)
+            {
+                // Ignore errors during cleanup
+                Console.WriteLine($"Error stopping microphone: {ex.Message}");
+            }
+        }
+
+        // Signal cancellation
         await disposalCts.CancelAsync();
+        
+        // Wait a moment for pending callbacks to complete
+        await Task.Delay(100);
+        
+        // Now dispose in order
         disposalCts.Dispose();
         realtimeConversationManager?.Dispose();
         selfReference?.Dispose();
+        
         try
         {
             if (moduleTask is not null)
@@ -243,6 +274,10 @@
         catch (JSDisconnectedException)
         {
             // Not an error
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error disposing module: {ex.Message}");
         }
     }
 

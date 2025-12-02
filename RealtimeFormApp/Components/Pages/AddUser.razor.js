@@ -51,6 +51,16 @@ export function setMute(micStream, mute) {
     }
 }
 
+export function stopMicrophone(micStream) {
+    if (micStream && micStream.getTracks) {
+        // Stop all audio tracks
+        micStream.getTracks().forEach(track => {
+            track.stop();
+        });
+        console.log('Microphone stopped');
+    }
+}
+
 async function processMicrophoneData(micStream, componentInstance) {
     const audioCtx = new AudioContext({ sampleRate: 24000 });
     const micStreamSource = audioCtx.createMediaStreamSource(micStream);
@@ -105,7 +115,10 @@ async function processMicrophoneData(micStream, componentInstance) {
         try {
             await componentInstance.invokeMethodAsync('ReceiveAudioDataAsync', new Uint8Array(int16Samples.buffer));
         } catch (error) {
-            console.error('Error sending audio data to component:', error);
+            // Only log if it's not a disposal error
+            if (!error.message.includes('disposed')) {
+                console.error('Error sending audio data to component:', error);
+            }
         }
     };
 

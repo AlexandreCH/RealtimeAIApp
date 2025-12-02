@@ -108,9 +108,36 @@ public class RealtimeConversationManager<TModel>(string modelDescription, Realti
         {
             case ConversationItemStreamingFinishedUpdate itemFinished:
                 // If we need to call a tool to update the model, do so
-                if (!string.IsNullOrEmpty(itemFinished.FunctionName) && await itemFinished.GetFunctionCallOutputAsync(tools) is { } output)
+                if (!string.IsNullOrEmpty(itemFinished.FunctionName))
                 {
-                    await session!.AddItemAsync(output);
+                    try
+                    {
+                        var output = await itemFinished.GetFunctionCallOutputAsync(tools);
+                        if (output is not null)
+                        {
+                            await session!.AddItemAsync(output);
+                        }
+                    }
+                    catch (JsonException ex)
+                    {
+                        // Log JSON errors and send feedback to AI
+                        addMessage($"⚠️ JSON error: {ex.Message}");
+                        var errorResponse = ConversationItem.CreateFunctionCallOutput(
+                            itemFinished.FunctionCallId ?? "",
+                            $"Error: Invalid JSON format. Please ensure the data matches the schema exactly. Error: {ex.Message}"
+                        );
+                        await session!.AddItemAsync(errorResponse);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log other errors
+                        addMessage($"❌ Error: {ex.Message}");
+                        var errorResponse = ConversationItem.CreateFunctionCallOutput(
+                            itemFinished.FunctionCallId ?? "",
+                            $"Error processing data: {ex.Message}"
+                        );
+                        await session!.AddItemAsync(errorResponse);
+                    }
                 }
                 break;
 
@@ -118,7 +145,14 @@ public class RealtimeConversationManager<TModel>(string modelDescription, Realti
                 // If we added one or more function call results, instruct the model to respond to them
                 if (responseFinished.CreatedItems.Any(item => !string.IsNullOrEmpty(item.FunctionName)))
                 {
-                    await session!.StartResponseAsync();
+                    try
+                    {
+                        await session!.StartResponseAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        addMessage($"Error starting response: {ex.Message}");
+                    }
                 }
                 break;
         }
