@@ -38,47 +38,71 @@
     });
     
     observer.observe(elem, { attributes: true });
+
+    let sanitizeTimeout;
+    elem.addEventListener('input', () => {
+        clearTimeout(sanitizeTimeout);
+        sanitizeTimeout = setTimeout(() => {
+            const sanitized = sanitizeText(elem.textContent);
+            // Update value
+        }, 150); // Wait for user to stop typing
+    });
 }
 
+// Module-level constants
+const REGEX_PATTERNS = {
+    script: /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    style: /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
+    tags: /<[^>]+>/g,
+    dangerous: /(javascript:|data:|vbscript:|on\w+\s*=)/gi
+};
+
+const parser = new DOMParser();
+const sanitizeCache = new Map();
+const MAX_CACHE_SIZE = 100;
+
 /**
- * Sanitizes text by removing all HTML tags and dangerous characters
- * @param {string} text - The text to sanitize
- * @returns {string} - Sanitized plain text
+ * Optimized sanitization with caching and early exits
  */
 function sanitizeText(text) {
-    if (!text) {
-        return '';
-    }
-
-    // Convert to string if not already
+    if (!text) return '';
+    
     text = String(text);
-
-    // Create a temporary element to decode HTML entities safely
-    const temp = document.createElement('div');
-    temp.textContent = text;
-    let sanitized = temp.innerHTML;
-
-    // Decode common HTML entities
+    
+    // Check cache
+    if (sanitizeCache.has(text)) {
+        return sanitizeCache.get(text);
+    }
+    
+    // Fast path for safe input
+    if (!/[<>&"']/.test(text)) {
+        const result = text.trim();
+        cacheResult(text, result);
+        return result;
+    }
+    
+    // Full sanitization
+    const doc = parser.parseFromString(text, 'text/html');
+    let sanitized = doc.body.textContent || '';
+    
+    // Remove script/style tags first (most dangerous)
     sanitized = sanitized
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"')
-        .replace(/&#x27;/g, "'");
+        .replace(REGEX_PATTERNS.script, '')
+        .replace(REGEX_PATTERNS.style, '')
+        .replace(REGEX_PATTERNS.tags, '');
+    
+    // Remove dangerous patterns (combined)
+    sanitized = sanitized.replace(REGEX_PATTERNS.dangerous, '');
+    
+    const result = sanitized.trim();
+    cacheResult(text, result);
+    return result;
+}
 
-    // Remove all HTML tags including script tags
-    sanitized = sanitized
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-        .replace(/<[^>]+>/g, '');
-
-    // Remove potentially dangerous characters and protocols
-    sanitized = sanitized
-        .replace(/javascript:/gi, '')
-        .replace(/data:/gi, '')
-        .replace(/vbscript:/gi, '')
-        .replace(/on\w+\s*=/gi, '');
-
-    // Trim whitespace
-    return sanitized.trim();
+function cacheResult(key, value) {
+    if (sanitizeCache.size >= MAX_CACHE_SIZE) {
+        const firstKey = sanitizeCache.keys().next().value;
+        sanitizeCache.delete(firstKey);
+    }
+    sanitizeCache.set(key, value);
 }
